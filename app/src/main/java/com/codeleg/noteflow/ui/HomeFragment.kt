@@ -1,60 +1,80 @@
 package com.codeleg.noteflow.ui
 
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.codeleg.noteflow.R
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
+import com.codeleg.noteflow.adapter.NoteAdapter
+import com.codeleg.noteflow.databinding.FragmentHomeBinding
+import com.codeleg.noteflow.model.Note
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class HomeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var homeBinding: FragmentHomeBinding? = null
+    private val binding get() = homeBinding!!
+    private lateinit var noteRecyclerView: RecyclerView
+    private lateinit var noteAdapter: NoteAdapter
+    private var navigation: FragmentNavigation? = null
+    private lateinit var addNoteFab: FloatingActionButton
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is FragmentNavigation) {
+            navigation = context
         }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
+    ): View {
+        homeBinding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment HomeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        noteRecyclerView = binding.notesRecyclerView
+        addNoteFab = binding.addNotesFab
+        addNoteFab.setOnClickListener {
+            navigation?.navigateTo(AddNoteFragment(), null)
+        }
+
+
+        val dummyNotes = listOf(
+            Note(1, "Meeting Notes", "Discussed Q3 roadmap and project timelines."),
+            Note(2, "Grocery List", "Milk, Bread, Eggs, Cheese, Fruits"),
+            Note(3, "Book Ideas", "A sci-fi novel about AI consciousness."),
+            Note(4, "Workout Plan", "Monday: Chest, Tuesday: Back, Wednesday: Legs"),
+            Note(5, "Recipe for Pasta", "Ingredients: Pasta, tomatoes, garlic, olive oil."),
+            Note(6, "Gift Ideas for Mom", "Scarf, perfume, or a new book."),
+            Note(7, "Learning Spanish", "Practice verb conjugations. Ser vs Estar."),
+            Note(8, "Project Deadline", "Submit the final report by Friday EOD."),
+            Note(9, "Vacation Plans", "Research flights to Italy for next summer."),
+            Note(10, "Daily Reflection", "Today was productive. Finished the main feature.")
+        )
+
+        noteAdapter = NoteAdapter(requireContext(), dummyNotes, this)
+        noteRecyclerView.adapter = noteAdapter
+    }
+
+    override fun onNoteClick(note: Note) {
+        val bundle = Bundle().apply {
+            putInt("noteId", note.id)
+            putString("noteTitle", note.title)
+            putString("noteDescription", note.description)
+        }
+        navigation?.navigateTo(EditFragment(), bundle)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        homeBinding = null
     }
 }

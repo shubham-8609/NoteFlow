@@ -11,6 +11,7 @@
         android:id="@+id/tv_edit_note_heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/baloo_bhaina_2_semibold"
         android:textSize="@dimen/_17ssp"
         android:text="Edit Note." />
 
@@ -26,6 +27,7 @@
         android:id="@+id/et_edit_note_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/baloo_bhaina_2_semibold"
         android:hint="Enter the title"
         android:maxLines="1"
         android:textSize="@dimen/_15ssp" />
@@ -45,6 +47,7 @@
             android:id="@+id/et_edit_note_desc"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:fontFamily="@font/baloo_bhaina_2_semibold"
             android:gravity="top"
             android:hint="Add note description"
             android:textSize="@dimen/_14ssp" />

@@ -11,6 +11,7 @@
         android:id="@+id/tv_add_note_heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/baloo_bhaina_2_semibold"
         android:textSize="@dimen/_17ssp"
         android:text="Add Note." />
 
@@ -25,6 +26,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_add_note_title"
             android:layout_width="match_parent"
+            android:fontFamily="@font/baloo_bhaina_2_semibold"
             android:layout_height="wrap_content"
             android:hint="Enter the title"
             android:maxLines="1"
@@ -44,6 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="top"
+            android:fontFamily="@font/baloo_bhaina_2_semibold"
             android:hint="Add note description"
             android:textSize="@dimen/_14ssp" />
     </com.google.android.material.textfield.TextInputLayout>

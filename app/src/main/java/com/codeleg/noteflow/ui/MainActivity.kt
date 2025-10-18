@@ -5,10 +5,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import com.codeleg.noteflow.R
 import com.codeleg.noteflow.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), FragmentNavigation {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -34,6 +35,14 @@ class MainActivity : AppCompatActivity() {
     private fun setupUI(fragment: androidx.fragment.app.Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, fragment)
+            .commit()
+    }
+
+    override fun navigateTo(fragment: Fragment, args: Bundle?) {
+        fragment.arguments = args
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_container, fragment)
+            .addToBackStack(null)
             .commit()
     }
 }
