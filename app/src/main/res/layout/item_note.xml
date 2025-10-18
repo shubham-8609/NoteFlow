@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="@dimen/_5sdp"
+    app:cardElevation="@dimen/_4sdp"
+    app:cardCornerRadius="@dimen/_8sdp"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/_11sdp">
+        <TextView
+            android:id="@+id/tv_note_title"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="200"
+            android:textColor="@color/primary"
+            android:text="Note Title "
+            android:textSize="@dimen/_19ssp"
+            android:textStyle="bold"
+            />
+        <TextView
+            android:id="@+id/tv_note_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:maxHeight="@dimen/_150sdp"
+            android:text="Description"
+            android:textSize="@dimen/_14sdp"/>
+
+
+    </LinearLayout>
+
+
+
+</com.google.android.material.card.MaterialCardView>
