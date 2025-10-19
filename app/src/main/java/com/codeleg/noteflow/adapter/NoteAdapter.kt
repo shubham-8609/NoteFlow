@@ -8,10 +8,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.codeleg.noteflow.R
 import com.codeleg.noteflow.model.Note
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class NoteAdapter(
     private val context: Context, 
-    private val notes: List<Note>,
+    private var notes: MutableList<Note>,
     private val listener: OnNoteClickListener
 ) : RecyclerView.Adapter<NoteAdapter.ViewHolder>() {
 
@@ -40,5 +43,13 @@ class NoteAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.tv_note_title)
         val description: TextView = itemView.findViewById(R.id.tv_note_description)
+    }
+     fun updateNotes(notes: List<Note>){
+        CoroutineScope(Dispatchers.Main).launch {
+        this@NoteAdapter.notes.clear()
+        this@NoteAdapter.notes.addAll(notes)
+        notifyDataSetChanged()
+
+        }
     }
 }

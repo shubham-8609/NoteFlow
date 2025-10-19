@@ -1,16 +1,25 @@
 package com.codeleg.noteflow.ui
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.codeleg.noteflow.adapter.NoteAdapter
+import com.codeleg.noteflow.database.NoteDao
+import com.codeleg.noteflow.database.NoteDatabase
 import com.codeleg.noteflow.databinding.FragmentHomeBinding
 import com.codeleg.noteflow.model.Note
+import com.codeleg.noteflow.utils.FragmentNavigation
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.internal.notify
 
 class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
 
@@ -20,14 +29,21 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
     private lateinit var noteAdapter: NoteAdapter
     private var navigation: FragmentNavigation? = null
     private lateinit var addNoteFab: FloatingActionButton
+    private lateinit var NoteDao: NoteDao
+    private lateinit var NoteDB: NoteDatabase
+    private var notes = mutableListOf<Note>()
+
 
 
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is FragmentNavigation) {
-            navigation = context
-        }
+            if (context is FragmentNavigation) {
+                navigation = context
+            }
+        NoteDB = NoteDatabase.getDB(requireContext())
+        NoteDao = NoteDB.getNoteDao()
+
     }
 
     override fun onCreateView(
@@ -40,41 +56,47 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         noteRecyclerView = binding.notesRecyclerView
         addNoteFab = binding.addNotesFab
-        addNoteFab.setOnClickListener {
-            navigation?.navigateTo(AddNoteFragment(), null)
+
+        noteAdapter = NoteAdapter(requireContext(), notes, this)
+        noteRecyclerView.adapter = noteAdapter
+
+        // Load notes
+        lifecycleScope.launch {
+            val fetchedNotes = NoteDao.getAllNotes()
+            notes.clear()
+            notes.addAll(fetchedNotes)
+            noteAdapter.notifyDataSetChanged()
         }
 
-
-        val dummyNotes = listOf(
-            Note(1, "Meeting Notes", "Discussed Q3 roadmap and project timelines."),
-            Note(2, "Grocery List", "Milk, Bread, Eggs, Cheese, Fruits"),
-            Note(3, "Book Ideas", "A sci-fi novel about AI consciousness."),
-            Note(4, "Workout Plan", "Monday: Chest, Tuesday: Back, Wednesday: Legs"),
-            Note(5, "Recipe for Pasta", "Ingredients: Pasta, tomatoes, garlic, olive oil."),
-            Note(6, "Gift Ideas for Mom", "Scarf, perfume, or a new book."),
-            Note(7, "Learning Spanish", "Practice verb conjugations. Ser vs Estar."),
-            Note(8, "Project Deadline", "Submit the final report by Friday EOD."),
-            Note(9, "Vacation Plans", "Research flights to Italy for next summer."),
-            Note(10, "Daily Reflection", "Today was productive. Finished the main feature.")
-        )
-
-        noteAdapter = NoteAdapter(requireContext(), dummyNotes, this)
-        noteRecyclerView.adapter = noteAdapter
+        addNoteFab.setOnClickListener {
+            navigation?.navigateTo(AddNoteFragment(), null, true)
+        }
     }
+
 
     override fun onNoteClick(note: Note) {
         val bundle = Bundle().apply {
-            putInt("noteId", note.id)
-            putString("noteTitle", note.title)
-            putString("noteDescription", note.description)
+            putParcelable("note", note)
         }
-        navigation?.navigateTo(EditFragment(), bundle)
+        navigation?.navigateTo(EditFragment(), bundle, true)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         homeBinding = null
+
     }
+/*
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            val fetchedNotes = NoteDao.getAllNotes()
+            notes.clear()
+            notes.addAll(fetchedNotes)
+            noteAdapter.notifyDataSetChanged()
+        }
+    }*/
 }
