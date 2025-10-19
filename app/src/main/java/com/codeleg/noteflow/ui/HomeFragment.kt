@@ -3,6 +3,7 @@ package com.codeleg.noteflow.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +17,7 @@ import com.codeleg.noteflow.databinding.FragmentHomeBinding
 import com.codeleg.noteflow.model.Note
 import com.codeleg.noteflow.utils.FragmentNavigation
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,14 +25,13 @@ import okhttp3.internal.notify
 
 class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
 
-    private var homeBinding: FragmentHomeBinding? = null
-    private val binding get() = homeBinding!!
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
     private lateinit var noteRecyclerView: RecyclerView
     private lateinit var noteAdapter: NoteAdapter
     private var navigation: FragmentNavigation? = null
     private lateinit var addNoteFab: FloatingActionButton
-    private lateinit var NoteDao: NoteDao
-    private lateinit var NoteDB: NoteDatabase
+    private val  NoteDao: NoteDao by lazy { NoteDatabase.getDB(requireContext()).getNoteDao() }
     private var notes = mutableListOf<Note>()
 
 
@@ -38,11 +39,7 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-            if (context is FragmentNavigation) {
-                navigation = context
-            }
-        NoteDB = NoteDatabase.getDB(requireContext())
-        NoteDao = NoteDB.getNoteDao()
+            navigation = context as? FragmentNavigation
 
     }
 
@@ -50,30 +47,26 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        homeBinding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        addNoteFab = binding.addNotesFab
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        noteRecyclerView = binding.notesRecyclerView
-        addNoteFab = binding.addNotesFab
-
-        noteAdapter = NoteAdapter(requireContext(), notes, this)
-        noteRecyclerView.adapter = noteAdapter
-
-        // Load notes
-        lifecycleScope.launch {
-            val fetchedNotes = NoteDao.getAllNotes()
-            notes.clear()
-            notes.addAll(fetchedNotes)
-            noteAdapter.notifyDataSetChanged()
-        }
+        setupRecyclerView()
+        loadNotes()
 
         addNoteFab.setOnClickListener {
+            Log.d("HomeFragment", "FloatingActionButton clicked")
             navigation?.navigateTo(AddNoteFragment(), null, true)
         }
+    }
+
+    private fun setupRecyclerView(){
+        noteRecyclerView = binding.notesRecyclerView
+        noteAdapter = NoteAdapter(requireContext(), notes, this)
+        noteRecyclerView.adapter = noteAdapter
     }
 
 
@@ -86,17 +79,17 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        homeBinding = null
-
+        _binding = null
     }
-/*
-    override fun onResume() {
-        super.onResume()
+
+    private fun loadNotes() {
         lifecycleScope.launch {
             val fetchedNotes = NoteDao.getAllNotes()
-            notes.clear()
-            notes.addAll(fetchedNotes)
+            notes.apply {
+                clear()
+                addAll(fetchedNotes)
+            }
             noteAdapter.notifyDataSetChanged()
         }
-    }*/
+    }
 }

@@ -17,33 +17,33 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+        binding = ActivityMainBinding.inflate(layoutInflater).apply { setContentView(root) }
+        handleInsets()
+        if (savedInstanceState == null) {
+            navigateTo(HomeFragment(),  null , false)
+        }
+
+    }
+    private fun handleInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             insets
         }
-
-        if (savedInstanceState == null) {
-            setupUI(HomeFragment())
-        }
     }
-
-    private fun setupUI(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, fragment)
-            .commit()
-    }
-
+    
     override fun navigateTo(fragment: Fragment, args: Bundle?, addToBackStack: Boolean) {
         fragment.arguments = args
-       val fm =  supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, fragment)
-            if (addToBackStack) {
-                fm.addToBackStack(null)
-            }
-            fm.commit()
+        with(supportFragmentManager.beginTransaction()) {
+            setCustomAnimations(
+                android.R.anim.fade_in,
+                android.R.anim.fade_out,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out
+            )
+            replace(R.id.main_container, fragment)
+            if (addToBackStack) addToBackStack(fragment::class.java.simpleName)
+            commit()
+        }
     }
 }
