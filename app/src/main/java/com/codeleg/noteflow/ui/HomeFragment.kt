@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import com.codeleg.noteflow.R
 import com.codeleg.noteflow.adapter.NoteAdapter
 import com.codeleg.noteflow.database.NoteDao
 import com.codeleg.noteflow.database.NoteDatabase
@@ -60,6 +61,7 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
         addNoteFab.setOnClickListener {
             Log.d("HomeFragment", "FloatingActionButton clicked")
             navigation?.navigateTo(AddNoteFragment(), null, true)
+            navigation?.updateToolbar("NoteFlow", "Add Note", R.menu.add_page_menu)
         }
     }
 
@@ -75,6 +77,7 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
             putParcelable("note", note)
         }
         navigation?.navigateTo(EditFragment(), bundle, true)
+        navigation?.updateToolbar("NoteFlow", "Edit Note", 0)
     }
 
     override fun onDestroyView() {
@@ -85,11 +88,7 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
     private fun loadNotes() {
         lifecycleScope.launch {
             val fetchedNotes = NoteDao.getAllNotes()
-            notes.apply {
-                clear()
-                addAll(fetchedNotes)
-            }
-            noteAdapter.notifyDataSetChanged()
+           noteAdapter.updateNotes(fetchedNotes)
         }
     }
 }
