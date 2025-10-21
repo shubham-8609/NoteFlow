@@ -3,6 +3,7 @@
     <!-- Primary colors -->
     <color name="primary">#81C784</color>
     <color name="primary_variant">#388E3C</color>
+    <color name="toolbar_bg">#5425FFD9</color>
     <color name="on_primary">#000000</color>
 
     <!-- Secondary colors -->

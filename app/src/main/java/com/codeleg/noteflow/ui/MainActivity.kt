@@ -3,6 +3,7 @@ package com.codeleg.noteflow.ui
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -12,11 +13,19 @@ import com.codeleg.noteflow.R
 import com.codeleg.noteflow.databinding.ActivityMainBinding
 import com.codeleg.noteflow.utils.FragmentNavigation
 import androidx.activity.OnBackPressedCallback
+import androidx.lifecycle.lifecycleScope
+import com.codeleg.noteflow.database.NoteDao
+import com.codeleg.noteflow.database.NoteDatabase
+import com.codeleg.noteflow.utils.DialogHelper
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), FragmentNavigation {
 
     private lateinit var binding: ActivityMainBinding
     private var currentMenuId: Int = 0
+    private val noteDao: NoteDao by lazy {
+        NoteDatabase.getDB(this).getNoteDao()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,13 +34,13 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
         handleInsets()
         manageToolbar()
         if (savedInstanceState == null) {
-            navigateTo(HomeFragment(),  null , false)
+            navigateTo(HomeFragment(), null, false , "Notes" , R.menu.home_page_menu)
         }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (supportFragmentManager.backStackEntryCount > 0) {
                     supportFragmentManager.popBackStack()
-                    updateToolbar("NoteFlow", "Notes", R.menu.home_page_menu)
+                    updateToolbar( "Notes", R.menu.home_page_menu)
                 } else {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
@@ -40,6 +49,7 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
         })
 
     }
+
     private fun handleInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -48,7 +58,7 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
         }
     }
 
-    override fun navigateTo(fragment: Fragment, args: Bundle?, addToBackStack: Boolean) {
+    override fun navigateTo(fragment: Fragment, args: Bundle?, addToBackStack: Boolean , subtitle:String , menuId:Int) {
         fragment.arguments = args
         with(supportFragmentManager.beginTransaction()) {
             setCustomAnimations(
@@ -60,10 +70,11 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
             replace(R.id.main_container, fragment)
             if (addToBackStack) addToBackStack(fragment::class.java.simpleName)
             commit()
+            updateToolbar(subtitle , menuId)
         }
     }
 
-    override fun updateToolbar(title: String, subtitle: String, menuId: Int) {
+    override fun updateToolbar( subtitle: String, menuId: Int) {
         supportActionBar?.title = title
         supportActionBar?.subtitle = subtitle
         if (this.currentMenuId != menuId) {
@@ -72,7 +83,43 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
         }
     }
 
-    private fun manageToolbar(){
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.delete_all_option -> {
+                DialogHelper.showConfirmDialog(
+                    this@MainActivity,
+                    "Delete all notes",
+                    "Are you sure you want to delete all notes ??",
+                    "Yes",
+                    "No",
+                    onConfirm = {
+                        lifecycleScope.launch {
+                            noteDao.deleteAllNotes()
+                            navigateTo(HomeFragment() , null , false , "Notes" ,  R.menu.home_page_menu)
+                        }
+                    })
+            }
+            R.id.discard_note_option -> navigateTo(HomeFragment() , null , false , "Notes" , R.menu.home_page_menu)
+            R.id.update_note_option ->  supportFragmentManager.setFragmentResult("update_note", Bundle.EMPTY)
+            R.id.save_note_option -> supportFragmentManager.setFragmentResult("save_note", Bundle.EMPTY)
+            R.id.delete_from_edit -> {
+                DialogHelper.showConfirmDialog(
+                    this@MainActivity ,
+                    "Delete this note ?",
+                    "Are you sure you want to delete note ??",
+                    "Yes",
+                    "No",
+                    onConfirm = {
+                        supportFragmentManager.setFragmentResult("delete_note_request", Bundle.EMPTY)
+                    }
+                )
+            }
+
+        }
+        return true
+    }
+
+    private fun manageToolbar() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.subtitle = "Notes"
     }
@@ -80,8 +127,12 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         if (currentMenuId != 0) {
             menuInflater.inflate(currentMenuId, menu)
+        } else {
+            menuInflater.inflate(R.menu.home_page_menu, menu)
         }
         return super.onCreateOptionsMenu(menu)
     }
-    
+
+
+
 }

@@ -25,4 +25,8 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE title LIKE :query OR description LIKE :query ORDER BY id DESC")
     suspend fun searchNote(query: String?): List<Note>
 
+    @Query("DELETE FROM notes")
+    suspend fun deleteAllNotes()
+
+
 }

@@ -3,13 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/save_note_option"
-        android:title="Save as new Note"
+        android:title="Save"
         android:icon="@android:drawable/ic_menu_save"
+        android:id="@+id/update_note_option"
         app:showAsAction="always"/>
+
     <item
-        android:id="@+id/discard_note_option"
-        android:title="Discard"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel" />
+        android:title="Delete"
+        android:id="@+id/delete_from_edit"
+        android:icon="@android:drawable/ic_menu_delete"
+        />
+
 
 </menu>

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.codeleg.noteflow.R
 import com.codeleg.noteflow.database.NoteDao
 import com.codeleg.noteflow.database.NoteDatabase
 import com.codeleg.noteflow.databinding.FragmentEditBinding
@@ -22,11 +23,20 @@ class EditFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var etEditNoteTitle: TextInputEditText
     private lateinit var etEditNoteDesc: TextInputEditText
-    private lateinit var btnSaveNote: FloatingActionButton
     private var navigation: FragmentNavigation? = null
     private lateinit var NoteDao: NoteDao
     private lateinit var NoteDB: NoteDatabase
     private var currentNote: Note? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        parentFragmentManager.setFragmentResultListener("update_note", this) { _, _ ->
+            updateNoteLogic()
+        }
+        parentFragmentManager.setFragmentResultListener("delete_note_request", this) { _, _ ->
+            deleteNoteLogic()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,22 +60,6 @@ class EditFragment : Fragment() {
 
         etEditNoteTitle = binding.etEditNoteTitle
         etEditNoteDesc = binding.etEditNoteDesc
-        btnSaveNote = binding.btnSaveNote
-
-        btnSaveNote.setOnClickListener {
-            val title = etEditNoteTitle.text.toString()
-            val desc = etEditNoteDesc.text.toString()
-
-            if (title.isNotEmpty()) {
-                val note = Note(currentNote?.id ?: 0, title, desc)
-                 lifecycleScope.launch {
-                     NoteDao.updateNote(note)
-                     navigation?.navigateTo(HomeFragment(), null, false)
-                 }
-
-            }
-        }
-
         arguments?.let {
             val note = it.getParcelable<Note>("note")
             if (note != null) {
@@ -80,4 +74,30 @@ class EditFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    private fun updateNoteLogic(){
+        val title = etEditNoteTitle.text.toString()
+        val desc = etEditNoteDesc.text.toString()
+
+        if (title.trim().isNotEmpty()) {
+            val note = Note(currentNote?.id ?: 0, title, desc)
+            lifecycleScope.launch {
+                NoteDao.updateNote(note)
+                navigation?.navigateTo(HomeFragment(), null, false , "Notes" , R.menu.home_page_menu)
+            }
+
+        }else{
+            etEditNoteTitle.error = "Title cannot be empty"
+        }
+    }
+
+    private fun deleteNoteLogic() {
+        currentNote?.let { note ->
+            lifecycleScope.launch {
+                NoteDao.deleteNote(note)
+                navigation?.navigateTo(HomeFragment(), null, false, "Notes", R.menu.home_page_menu)
+            }
+        }
+    }
+
 }

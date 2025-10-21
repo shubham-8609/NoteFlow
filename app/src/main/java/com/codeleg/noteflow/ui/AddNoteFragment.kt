@@ -25,7 +25,6 @@ class AddNoteFragment : Fragment() {
 
     private lateinit var etAddNoteTitle: TextInputEditText
     private lateinit var etAddNoteDesc: TextInputEditText
-    private lateinit var addBtn: FloatingActionButton
     private lateinit var NoteDB: NoteDatabase
     private lateinit var NoteDao: NoteDao
     private var navigation: FragmentNavigation? = null
@@ -41,6 +40,13 @@ class AddNoteFragment : Fragment() {
 
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        parentFragmentManager.setFragmentResultListener("save_note", this) { _, _ ->
+            saveNote()
+        }
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,34 +55,36 @@ class AddNoteFragment : Fragment() {
         AddNoteBinding = FragmentAddNoteBinding.inflate(inflater, container, false)
         etAddNoteTitle = binding.etAddNoteTitle
         etAddNoteDesc = binding.etAddNoteDesc
-        addBtn = binding.fabAddNote
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        addBtn.setOnClickListener {
-            val title = etAddNoteTitle.text.toString()
-            val desc = etAddNoteDesc.text.toString()
-            if (title.isNotEmpty() || desc.isNotEmpty()) {
-                val note = Note(0, title, desc)
-                lifecycleScope.launch {
-                NoteDao.insertNote(note)
-
-                }
-                etAddNoteTitle.text?.clear()
-                etAddNoteDesc.text?.clear()
-
-                navigation?.navigateTo(HomeFragment(), null, false)
-
-            }
-        }
     }
 
 
     override fun onDetach() {
         AddNoteBinding = null
         super.onDetach()
+    }
+
+    fun saveNote(){
+        val title = etAddNoteTitle.text.toString()
+        val desc = etAddNoteDesc.text.toString()
+        if (title.trim().isNotEmpty()) {
+            val note = Note(0, title, desc)
+            lifecycleScope.launch {
+                NoteDao.insertNote(note)
+
+                etAddNoteTitle.text?.clear()
+                etAddNoteDesc.text?.clear()
+
+                navigation?.navigateTo(HomeFragment(), null, false , "Notes" , R.menu.home_page_menu)
+            }
+        }else{
+            etAddNoteTitle.error = "Title cannot be empty"
+
+        }
     }
 
 }

@@ -4,7 +4,7 @@
     <color name="primary">#4CAF50</color>
     <color name="primary_variant">#388E3C</color>
     <color name="on_primary">#FFFFFF</color>
-
+    <color name="toolbar_bg">#5C25FFD9</color>
     <!-- Secondary colors -->
     <color name="secondary">#FF9800</color>
     <color name="secondary_variant">#F57C00</color>
