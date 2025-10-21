@@ -13,6 +13,7 @@ import com.codeleg.noteflow.R
 import com.codeleg.noteflow.databinding.ActivityMainBinding
 import com.codeleg.noteflow.utils.FragmentNavigation
 import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.codeleg.noteflow.database.NoteDao
 import com.codeleg.noteflow.database.NoteDatabase
@@ -34,13 +35,13 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
         handleInsets()
         manageToolbar()
         if (savedInstanceState == null) {
-            navigateTo(HomeFragment(), null, false , "Notes" , R.menu.home_page_menu)
+            navigateTo(HomeFragment(), null, false, "Notes", R.menu.home_page_menu)
         }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (supportFragmentManager.backStackEntryCount > 0) {
-                    supportFragmentManager.popBackStack()
-                    updateToolbar( "Notes", R.menu.home_page_menu)
+                    navigateTo(HomeFragment(), null, false, "Notes", R.menu.home_page_menu)
+                    supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
                 } else {
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
@@ -58,7 +59,13 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
         }
     }
 
-    override fun navigateTo(fragment: Fragment, args: Bundle?, addToBackStack: Boolean , subtitle:String , menuId:Int) {
+    override fun navigateTo(
+        fragment: Fragment,
+        args: Bundle?,
+        addToBackStack: Boolean,
+        subtitle: String,
+        menuId: Int
+    ) {
         fragment.arguments = args
         with(supportFragmentManager.beginTransaction()) {
             setCustomAnimations(
@@ -70,11 +77,11 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
             replace(R.id.main_container, fragment)
             if (addToBackStack) addToBackStack(fragment::class.java.simpleName)
             commit()
-            updateToolbar(subtitle , menuId)
+            updateToolbar(subtitle, menuId)
         }
     }
 
-    override fun updateToolbar( subtitle: String, menuId: Int) {
+    override fun updateToolbar(subtitle: String, menuId: Int) {
         supportActionBar?.title = title
         supportActionBar?.subtitle = subtitle
         if (this.currentMenuId != menuId) {
@@ -95,22 +102,41 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
                     onConfirm = {
                         lifecycleScope.launch {
                             noteDao.deleteAllNotes()
-                            navigateTo(HomeFragment() , null , false , "Notes" ,  R.menu.home_page_menu)
+                            navigateTo(HomeFragment(), null, false, "Notes", R.menu.home_page_menu)
                         }
                     })
             }
-            R.id.discard_note_option -> navigateTo(HomeFragment() , null , false , "Notes" , R.menu.home_page_menu)
-            R.id.update_note_option ->  supportFragmentManager.setFragmentResult("update_note", Bundle.EMPTY)
-            R.id.save_note_option -> supportFragmentManager.setFragmentResult("save_note", Bundle.EMPTY)
+
+            R.id.discard_note_option -> navigateTo(
+                HomeFragment(),
+                null,
+                false,
+                "Notes",
+                R.menu.home_page_menu
+            )
+
+            R.id.update_note_option -> supportFragmentManager.setFragmentResult(
+                "update_note",
+                Bundle.EMPTY
+            )
+
+            R.id.save_note_option -> supportFragmentManager.setFragmentResult(
+                "save_note",
+                Bundle.EMPTY
+            )
+
             R.id.delete_from_edit -> {
                 DialogHelper.showConfirmDialog(
-                    this@MainActivity ,
+                    this@MainActivity,
                     "Delete this note ?",
                     "Are you sure you want to delete note ??",
                     "Yes",
                     "No",
                     onConfirm = {
-                        supportFragmentManager.setFragmentResult("delete_note_request", Bundle.EMPTY)
+                        supportFragmentManager.setFragmentResult(
+                            "delete_note_request",
+                            Bundle.EMPTY
+                        )
                     }
                 )
             }
@@ -132,7 +158,6 @@ class MainActivity : AppCompatActivity(), FragmentNavigation {
         }
         return super.onCreateOptionsMenu(menu)
     }
-
 
 
 }

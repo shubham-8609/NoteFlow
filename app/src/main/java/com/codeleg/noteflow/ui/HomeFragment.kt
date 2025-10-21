@@ -62,7 +62,7 @@ class HomeFragment : Fragment(), NoteAdapter.OnNoteClickListener {
         loadNotes()
 
         addNoteFab.setOnClickListener {
-            Log.d("HomeFragment", "FloatingActionButton clicked")
+
             navigation?.navigateTo(AddNoteFragment(), null, true, "Add Note", R.menu.add_page_menu)
         }
     }
