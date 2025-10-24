@@ -57,6 +57,21 @@ dependencies {
     implementation("androidx.room:room-ktx:2.8.1")
     kapt("androidx.room:room-compiler:2.8.1")
 
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4")
+
+    // (Optional but recommended)
+    // For using LiveData with ViewModel
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.4")
+
+    // (Optional)
+    // LiveData builder for Coroutines
+    implementation("androidx.lifecycle:lifecycle-livedata-core-ktx:2.9.4")
+    implementation("androidx.fragment:fragment-ktx:1.8.9")
+
+
+    // (Optional) For saving and restoring UI state
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.9.4")
     // SSP AND SDP
     implementation("com.intuit.ssp:ssp-android:1.1.1")
     implementation("com.intuit.sdp:sdp-android:1.1.1")

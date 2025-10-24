@@ -13,17 +13,21 @@ import com.codeleg.noteflow.R
 import com.codeleg.noteflow.databinding.ActivityMainBinding
 import com.codeleg.noteflow.utils.FragmentNavigation
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.codeleg.noteflow.database.NoteDao
 import com.codeleg.noteflow.database.NoteDatabase
 import com.codeleg.noteflow.utils.DialogHelper
+import com.codeleg.noteflow.viewmodel.SharedNotesViewModel
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class MainActivity : AppCompatActivity(), FragmentNavigation {
 
     private lateinit var binding: ActivityMainBinding
     private var currentMenuId: Int = 0
+    private val notesViewModel: SharedNotesViewModel by viewModels()
     private val noteDao: NoteDao by lazy {
         NoteDatabase.getDB(this).getNoteDao()
     }
